@@ -32,7 +32,7 @@ public class OpenApiConfig {
                                 .type(SecurityScheme.Type.HTTP)
                                 .scheme("bearer")
                                 .bearerFormat("JWT")
-                                .description("Entrez le token JWT (obtenu depuis /auth/login)")))
-                .addSecurityItem(new SecurityRequirement().addList("bearer-jwt"));
+                                .description("Entrez le token JWT (obtenu depuis /auth/login). " +
+                                        "Note: Les endpoints /agent/chat et /agent/stream sont publics et ne nécessitent PAS de token.")));
     }
 }

@@ -1,5 +1,10 @@
 package com.smartcity.ai.agentiaservice.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +15,7 @@ import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping("/agent")
+@Tag(name = "Agent IA", description = "API d'Agent Intelligent pour interroger les services de la Smart City")
 public class AgentController {
 
     private final ChatClient chatClient;
@@ -21,15 +27,21 @@ public class AgentController {
                         Tu es l'Assistant Intelligent de la Smart City.
                         Tu aides les citoyens en vérifiant le trafic et la consommation d'énergie dans différentes zones.
                         
-                        Utilise tes outils disponibles pour répondre aux questions factuelles :
-                        - getTrafficStatus(zone) : pour obtenir l'état du trafic dans une zone
-                        - getEnergyConsumption(zone) : pour obtenir la consommation énergétique d'une zone
-                        - listAllTraffic() : pour lister toutes les zones de trafic
-                        - listAllEnergy() : pour lister toutes les zones d'énergie
+                        RÈGLES STRICTES :
+                        - Utilise UNIQUEMENT tes outils pour répondre (getTrafficStatus, getEnergyConsumption, listAllTraffic, listAllEnergy)
+                        - Ne réponds QU'aux questions sur le trafic et l'énergie de la ville
+                        - Si la question ne concerne pas ces sujets, réponds exactement : "Je ne peux répondre qu'aux questions sur le trafic et l'énergie de la Smart City"
+                        - NE DONNE JAMAIS d'informations inventées ou supposées
+                        - Si un outil retourne une erreur ou aucune donnée, dis explicitement : "Aucune donnée disponible pour cette zone"
+                        - Si un service est indisponible, dis : "Le service [nom] est temporairement indisponible"
                         
-                        Réponds de manière naturelle, claire et concise.
-                        Si tu ne sais pas ou si les données ne sont pas disponibles, dis-le clairement.
-                        Adapte ton ton selon le contexte : urgent pour incidents, rassurant pour situation normale.
+                        Outils disponibles :
+                        - getTrafficStatus(zone) : état du trafic dans une zone spécifique
+                        - getEnergyConsumption(zone) : consommation énergétique d'une zone
+                        - listAllTraffic() : liste toutes les zones de trafic
+                        - listAllEnergy() : liste toutes les zones d'énergie
+                        
+                        Réponds de manière naturelle mais UNIQUEMENT basé sur les résultats réels des outils.
                         """)
                 // 2. Logger pour debug
                 .defaultAdvisors(new SimpleLoggerAdvisor())
@@ -41,7 +53,18 @@ public class AgentController {
      * Exemple: GET /agent/chat?question=Quelle est la situation du trafic au Centre-Ville ?
      */
     @GetMapping("/chat")
-    public String chat(@RequestParam String question) {
+    @Operation(
+            summary = "Chat avec l'Agent IA",
+            description = "Posez une question à l'agent intelligent qui interrogera automatiquement les services Traffic et Energy selon le contexte",
+            security = {}  // Endpoint public, pas besoin d'authentification
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Réponse de l'agent"),
+            @ApiResponse(responseCode = "400", description = "Question invalide")
+    })
+    public String chat(
+            @Parameter(description = "Question à poser à l'agent (ex: Quel est l'état du trafic au Centre-Ville ?)", required = true)
+            @RequestParam String question) {
         return chatClient.prompt()
                 .user(question)
                 .call()
@@ -53,7 +76,17 @@ public class AgentController {
      * Exemple: GET /agent/stream?question=Donne-moi un résumé de l'état de la ville
      */
     @GetMapping("/stream")
-    public Flux<String> chatStream(@RequestParam String question) {
+    @Operation(
+            summary = "Chat en streaming",
+            description = "Réponse de l'agent en mode streaming (effet machine à écrire)",
+            security = {}  // Endpoint public, pas besoin d'authentification
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Flux de réponse de l'agent")
+    })
+    public Flux<String> chatStream(
+            @Parameter(description = "Question à poser à l'agent", required = true)
+            @RequestParam String question) {
         return chatClient.prompt()
                 .user(question)
                 .stream()
