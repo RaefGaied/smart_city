@@ -1,5 +1,6 @@
 package com.smartcity.ai.agentiaservice.controller;
 
+import com.smartcity.ai.agentiaservice.tools.CityTools;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,7 +21,7 @@ public class AgentController {
 
     private final ChatClient chatClient;
 
-    public AgentController(ChatClient.Builder builder) {
+    public AgentController(ChatClient.Builder builder, CityTools cityTools) {
         this.chatClient = builder
                 // 1. Définition du rôle (System Prompt)
                 .defaultSystem("""
@@ -43,7 +44,9 @@ public class AgentController {
                         
                         Réponds de manière naturelle mais UNIQUEMENT basé sur les résultats réels des outils.
                         """)
-                // 2. Logger pour debug
+                // 2. Injection des outils (CRITIQUE pour Function Calling)
+                .defaultTools(cityTools)
+                // 3. Logger pour debug
                 .defaultAdvisors(new SimpleLoggerAdvisor())
                 .build();
     }
