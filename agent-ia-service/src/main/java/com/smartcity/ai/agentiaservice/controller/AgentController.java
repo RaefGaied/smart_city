@@ -1,6 +1,5 @@
 package com.smartcity.ai.agentiaservice.controller;
 
-import com.smartcity.ai.agentiaservice.tools.CityTools;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -8,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,7 +21,7 @@ public class AgentController {
 
     private final ChatClient chatClient;
 
-    public AgentController(ChatClient.Builder builder, CityTools cityTools) {
+    public AgentController(ChatClient.Builder builder, SyncMcpToolCallbackProvider mcpTools) {
         this.chatClient = builder
                 // 1. Définition du rôle (System Prompt)
                 .defaultSystem("""
@@ -44,8 +44,8 @@ public class AgentController {
                         
                         Réponds de manière naturelle mais UNIQUEMENT basé sur les résultats réels des outils.
                         """)
-                // 2. Injection des outils (CRITIQUE pour Function Calling)
-                .defaultTools(cityTools)
+                // 2. Injection des callbacks MCP (CRITIQUE pour architecture distribuée)
+                .defaultToolCallbacks(mcpTools)
                 // 3. Logger pour debug
                 .defaultAdvisors(new SimpleLoggerAdvisor())
                 .build();
