@@ -7,6 +7,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/traffic")
@@ -34,6 +35,16 @@ public class TrafficController {
     @GetMapping("/zone/{zone}")
     public Traffic getByZone(@PathVariable String zone) {
         return service.getStatus(zone);
+    }
+    
+    /**
+     * NOUVEAU : Endpoint avec OpenFeign + Circuit Breaker
+     * Récupère Trafic + Énergie en une seule requête
+     * Si Energy Service est down, retourne quand même le trafic
+     */
+    @GetMapping("/zone/{zone}/with-energy")
+    public Map<String, Object> getTrafficWithEnergy(@PathVariable String zone) {
+        return service.getTrafficWithEnergy(zone);
     }
 
     // 🔒 ADMIN SEULEMENT (Correction ici : on accepte ADMIN ou ROLE_ADMIN)

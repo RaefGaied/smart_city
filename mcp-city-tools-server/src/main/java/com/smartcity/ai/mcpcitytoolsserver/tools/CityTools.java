@@ -1,7 +1,8 @@
 package com.smartcity.ai.mcpcitytoolsserver.tools;
 
-import org.springframework.ai.mcp.server.annotation.McpTool;
-import org.springframework.ai.mcp.server.annotation.McpToolParam;
+
+import org.springaicommunity.mcp.annotation.McpTool;
+import org.springaicommunity.mcp.annotation.McpToolParam;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 

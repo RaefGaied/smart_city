@@ -19,38 +19,44 @@ import java.util.UUID;
 @EnableDiscoveryClient
 public class AuthServiceApplication {
 
-    /*  PasswordEncoder passwordEncoder() {
+    @Bean
+    PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-   @Bean
-   CommandLineRunner runner(AppUserRepository appUserRepository,
-                            AppRoleRepository appRoleRepository) {
+    @Bean
+    CommandLineRunner runner(AppUserRepository appUserRepository,
+                            AppRoleRepository appRoleRepository,
+                            PasswordEncoder passwordEncoder) {
        return args -> {
+           // Créer les rôles
            AppRole appRole1 = AppRole.builder().name("ADMIN").build();
            AppRole appRole2 = AppRole.builder().name("USER").build();
 
            appRoleRepository.save(appRole1);
            appRoleRepository.save(appRole2);
 
+           // Créer un utilisateur ADMIN
            appUserRepository.save(AppUser.builder()
                    .id(UUID.randomUUID().toString())
-                   .username("raef")
-                   .mail("raef@gmail.com")
-                   .password(passwordEncoder().encode("1234"))
+                   .username("admin")
+                   .mail("admin@smartcity.ai")
+                   .password(passwordEncoder.encode("admin123"))
                    .roles(List.of(appRole1, appRole2))
                    .build());
 
+           // Créer un utilisateur USER
            appUserRepository.save(AppUser.builder()
                    .id(UUID.randomUUID().toString())
-                   .username("meriem")
-                   .mail("meriem@gmail.com")
-                   .password(passwordEncoder().encode("1234"))
+                   .username("user")
+                   .mail("user@smartcity.ai")
+                   .password(passwordEncoder.encode("user123"))
                    .roles(List.of(appRole2))
                    .build());
+           
+           System.out.println("✅ Comptes pré-créés : admin/admin123 (ADMIN+USER), user/user123 (USER)");
        };
-
-   }*/
+   }
 
     public static void main(String[] args) {
         SpringApplication.run(AuthServiceApplication.class, args);

@@ -26,8 +26,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Endpoints publics
-                        .requestMatchers("/agent/chat", "/agent/stream").permitAll()
+                        // Endpoints publics (accès direct + via Gateway)
+                        .requestMatchers("/agent/**").permitAll()
                         // Swagger UI et OpenAPI
                         .requestMatchers(
                                 "/swagger-ui/**",

@@ -26,10 +26,10 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/mcp/**").permitAll() // L'IA doit pouvoir accéder aux outils
-                        .anyRequest().permitAll() // On laisse passer, c'est @PreAuthorize qui bloquera
+                        .anyRequest().permitAll() // Tout est public pour démo Gateway
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                // Pas de JWT filter pour faciliter l'accès via Gateway
+                // .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 }

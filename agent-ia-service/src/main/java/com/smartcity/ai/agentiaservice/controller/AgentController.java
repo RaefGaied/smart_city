@@ -1,5 +1,6 @@
 package com.smartcity.ai.agentiaservice.controller;
 
+import com.smartcity.ai.agentiaservice.tools.CityTools;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -7,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
-import org.springframework.ai.mcp.SyncMcpToolCallbackProvider;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,7 +21,7 @@ public class AgentController {
 
     private final ChatClient chatClient;
 
-    public AgentController(ChatClient.Builder builder, SyncMcpToolCallbackProvider mcpTools) {
+    public AgentController(ChatClient.Builder builder, CityTools cityTools) {
         this.chatClient = builder
                 // 1. Définition du rôle (System Prompt)
                 .defaultSystem("""
@@ -36,16 +36,31 @@ public class AgentController {
                         - Si un outil retourne une erreur ou aucune donnée, dis explicitement : "Aucune donnée disponible pour cette zone"
                         - Si un service est indisponible, dis : "Le service [nom] est temporairement indisponible"
                         
+                        FORMAT DES RÉPONSES :
+                        - Pour les incidents : Liste TOUS les incidents avec le nom de zone, l'état (BLOQUE/DENSE/FLUIDE) et si incident=true
+                        - Pour les résumés : Utilise des puces (*) pour chaque zone avec détails complets
+                        - Sois précis avec les chiffres (ex: 850,3 kW/h, pas "environ 850")
+                        - Structure tes réponses en sections claires avec titres
+                        - Mets en évidence les zones problématiques
+                        
+                        EXEMPLE DE BONNE RÉPONSE pour "Y a-t-il des incidents ?" :
+                        "Il y a actuellement des incidents sur les routes de la ville. Voici les zones affectées :
+                        
+                        * L'Autoroute-Nord est bloquée en raison d'un incident.
+                        * La Zone-Sud est également bloquée en raison d'un incident.
+                        
+                        Les autres zones (Centre-Ville, Zone-Industrielle, Nord, Est, Ouest) sont fluides ou denses mais sans incident."
+                        
                         Outils disponibles :
                         - getTrafficStatus(zone) : état du trafic dans une zone spécifique
                         - getEnergyConsumption(zone) : consommation énergétique d'une zone
                         - listAllTraffic() : liste toutes les zones de trafic
                         - listAllEnergy() : liste toutes les zones d'énergie
                         
-                        Réponds de manière naturelle mais UNIQUEMENT basé sur les résultats réels des outils.
+                        Réponds de manière naturelle, détaillée et UNIQUEMENT basé sur les résultats réels des outils.
                         """)
-                // 2. Injection des callbacks MCP (CRITIQUE pour architecture distribuée)
-                .defaultToolCallbacks(mcpTools)
+                // 2. Injection des outils locaux
+                .defaultTools(cityTools)
                 // 3. Logger pour debug
                 .defaultAdvisors(new SimpleLoggerAdvisor())
                 .build();
